@@ -1,0 +1,73 @@
+{% extends "layout.htm" %}
+{% block content %}
+
+<div class="alert alert-info" role="alert">Вы вошли как <strong>{{ current_user.username }}</strong> с IP <strong>{{ remote_addr }}</strong></div>
+<div class="panel panel-default">
+  <div class="panel-heading">Адреса сетей для идентификации запросов</div>
+  <div class="panel-body">
+<table class="table">
+  <thead>
+    <tr>
+      <td><b>Имя</b></td>
+      <td><b>IP-адрес</b></td>
+      <td></td>
+    </tr>
+  </thead>
+  <tbody>
+
+  {% for client_net in client_nets %}
+
+    <tr>
+      <td>{{ client_net.name }}</td>
+      <td>{{ client_net.addr_ddn() }}</td>
+      <td><form method="post" action="settings/networks"><input type="hidden" name="name" value="{{ client_net.name }}"><button type="submit" class="btn btn-default btn-xs">Удалить</button></form></td>
+    </tr>
+
+  {% endfor %}
+
+    <tr><form method="post" action="/settings/networks">
+      <td><input type="text" name="name" value="default" class="form-control"></td>
+      <td><input type="text" name="addr" value="{{ request.remote_addr }}" class="form-control"></td>
+      <td><button type="submit" class="btn btn-default">Добавить/обновить</button></td>
+    </form></tr>
+  </tbody>
+</table>
+  </div>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">Фильтрация</div>
+  <div class="panel-body">
+<form method="post" action="/settings/filtering">
+  <table class="table">
+    <thead>
+      <tr>
+        <td><b>Категория</b></td>
+        <td><b>Запрет</b></td>
+      </tr>
+    <tbody>
+
+  {% for tag in tags %}
+
+      <tr>
+        <td>{{ tag.name }}</td>
+        <td><input type="checkbox" name="forbidden_tag" value="{{tag.id}}" {% if tag in forbidden_tags %}checked{% else %}{% endif %} data-toggle="toggle" data-onstyle="danger" data-offstyle="success" data-size="mini"></td>
+      </tr>
+  
+  {% endfor %}
+
+      <tr>
+        <td><b>Сайты, не входящие ни в одну категорию</b></td>
+        <td><input type="checkbox" name="false" value="allow_untagged" {% if not current_user.allow_untagged %}checked{% endif %} data-toggle="toggle" data-onstyle="danger" data-offstyle="success" data-size="mini"></td>
+      </tr>
+      <tr>
+        <td><b>Сайты, входящие одновременно в запрещенные и разрешенные категории</b></td>
+        <td><input type="checkbox" name="false" value="allow_mixed" {% if not current_user.allow_mixed %}checked{% endif %} data-toggle="toggle" data-onstyle="danger" data-offstyle="success" data-size="mini"></td>
+      </tr>
+    </tbody>
+  </table>
+  <input type="submit" value="Сохранить" class="btn btn-default">
+</form>
+  </div>
+</div>
+
+{% endblock %}

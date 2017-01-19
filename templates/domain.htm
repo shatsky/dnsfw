@@ -1,0 +1,137 @@
+{% extends "layout.htm" %}
+
+{% block content %}
+
+{% if domain %}
+  {% if current_user.is_authenticated %}
+    {% if domain_allowed %}
+
+<div class="alert alert-success"><strong>{{ domain }}</strong> не заблокирован для ваших пользователей</div>
+
+    {% else %}
+
+<div class="alert alert-danger"><strong>{{ domain }}</strong> заблокирован для ваших пользователей</div>
+
+    {% endif %}
+  {% else %}
+    {% if domain_allowed %}
+
+<div class="alert alert-success"><strong>{{ domain }}</strong> не заблокирован для неидентифицированных пользователей</div>
+
+    {% else %}
+
+<div class="alert alert-danger"><strong>{{ domain }}</strong> заблокирован для неидентифицированных пользователей</div>
+
+    {% endif %}
+  {% endif %}
+  {% if tagged_domain %}
+
+<div class="alert alert-warning">До тех пор, пока для домена <strong>{{ domain }}</strong> нет ни одной подтвержденной категории, для него действуют категории домена <strong><a href="/domain/{{ tagged_domain }}">{{ tagged_domain }}</a></strong></div>
+
+  {% endif %}
+
+<table class="table">
+  <thead>
+    <tr>
+      <td><b>Категория</b></td>
+      <td><b>Состояние</b></td>
+    </tr>
+  </thead>
+  <tbody>
+
+  {% for domain_tag in domain_tags %}
+
+    <tr>
+      <td>{{ domain_tag.tag.name }}</td>
+
+    {% if domain_tag.state == None %}
+
+      <td>
+        Предложен
+
+      {% if current_user.is_admin %}
+
+        <form method="post" class="form-inline" style="display: inline-block">
+          <input type="hidden" name="tag" value="{{ domain_tag.tag.id }}">
+          <button name="state" value="1" class="btn btn-default btn-xs">Подтвердить</button>
+          <button name="state" value="0" class="btn btn-default btn-xs">Отклонить</button>
+        </form>
+
+      {% endif %}
+
+      </td>
+
+    {% elif domain_tag.state == False %}
+
+      <td>
+        Отклонен
+
+      {% if current_user.is_admin %}
+
+        <form method="post" class="form-inline" style="display: inline-block">
+          <input type="hidden" name="tag" value="{{ domain_tag.tag.id }}">
+          <button name="state" value="1" class="btn btn-default btn-xs">Подтвердить</button>
+          <button name="state" value="0" class="btn btn-default btn-xs">Удалить</button>
+        </form>
+
+      {% endif %}
+
+      </td>
+
+    {% else %}
+
+      <td>
+        Подтвержден
+
+      {% if current_user.is_admin %}
+
+        <form method="post" class="form-inline" style="display: inline-block">
+          <label class="sr-only" for="tag"></label>
+          <input type="hidden" name="tag" value="{{ domain_tag.tag.id }}" id="tag">
+          <button name="state" value="0" class="btn btn-default btn-xs">Отклонить</button>
+        </form>
+      
+      {% endif %}    
+
+      </td>
+
+    {% endif %}
+
+    </tr>
+
+  {% endfor %}
+
+    <tr>
+      <td colspan="0">
+        <form method="post" class="form-inline">
+          <select name="tag" class="form-control">
+            <option disabled selected>Выберите категорию</option>
+
+  {% for tag in other_tags %}
+
+            <option value="{{ tag.id }}">{{ tag.name }}</option>
+
+  {% endfor %}
+
+          </select>
+
+  {% if current_user.is_admin %}
+
+          <input type="hidden" name="state" value="1">
+          <button type="submit" class="btn btn-default">Добавить</button>
+
+  {% else %}
+
+          <button type="submit" class="btn btn-default">Предложить</button>
+
+  {% endif %}
+
+        </form>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+{% endif %}
+
+{% endblock %}

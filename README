@@ -1,0 +1,3 @@
+DNSFW is a DNS content Filter with Web interface
+It is written in Python and uses Unbound DNS server
+Requirements: unbound with pythonmod, peewee, flask, flask-login
